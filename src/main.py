@@ -13,7 +13,7 @@ def store_url(_):
     """Store the URL """
     global stored
     if url_bar.text == 'local':
-        stored = 'http://127.0.0.1:8000/todos/'
+        stored = 'http://127.0.0.1:8000/products/'
     else:
         stored = url_bar.text
 
@@ -33,15 +33,23 @@ def get_res(_):
     in json format
     """
     try:
-        r = json.dumps(requests.get(stored).json(), indent=2)
+        r = json.dumps(requests.get(stored).json(), indent=4)
     except Exception as e:
         r = str(e)
     get_method.text = r
+    get_head()
+
+def get_head():
+    head_method.text = ''
+    response = requests.head(stored).headers
+    for k in response:
+        head_method.text += f'{k}: {response[k]}\n'
 
 # Create text areas to represent different sections
 url_bar = TextArea(height=1, wrap_lines=True)
 get_method = TextArea(wrap_lines=True, read_only=True, scrollbar=True)
 post_method = TextArea(wrap_lines=True)
+head_method = TextArea(scrollbar=True)
 
 # Keybind window
 keybinds_window = Frame(
@@ -61,7 +69,10 @@ keybinds_window = Frame(
 get_layout = HSplit(
     [
         Frame(url_bar, title="Enter URL"),  # URL input area at the top
-        Frame(get_method, title="GET"),
+        VSplit([
+            Frame(get_method, title="GET"),
+            Frame(head_method, title="HEAD"),
+        ]),
         keybinds_window
     ]
 )
@@ -69,7 +80,10 @@ get_layout = HSplit(
 post_layout = HSplit(
     [
         Frame(url_bar, title="Enter URL"),  # URL input area at the top
-        Frame(post_method, title="POST"),
+        VSplit([
+            Frame(post_method, title="POST"),
+            Frame(head_method, title="HEAD"),
+        ]),
         keybinds_window
     ]
 )
